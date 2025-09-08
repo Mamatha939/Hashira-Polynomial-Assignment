@@ -1,5 +1,4 @@
-import java.io.*;
-import java.math.BigInteger;
+import java.io.FileReader;
 import java.util.*;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -7,52 +6,85 @@ import org.json.JSONTokener;
 public class PolynomialEquation {
 
     public static void main(String[] args) throws Exception {
-        // Change this path for testcase 1 or 2
-        FileReader reader = new FileReader("input.json");
+        // ---------------------------
+        // Testcase selector
+        // Change filename to run Testcase 1 or Testcase 2
+        // ---------------------------
+        String filename = "input1.json";  // "input1.json" or "input2.json"
+        
+        FileReader reader = new FileReader(filename);
         JSONTokener tokener = new JSONTokener(reader);
         JSONObject obj = new JSONObject(tokener);
 
         int n = obj.getJSONObject("keys").getInt("n");
         int k = obj.getJSONObject("keys").getInt("k");
 
-        List<BigInteger> roots = new ArrayList<>();
-
-        // Convert each root value to decimal BigInteger
-        for (int i = 1; i <= n; i++) {
-            if (obj.has(String.valueOf(i))) {
-                JSONObject rootObj = obj.getJSONObject(String.valueOf(i));
-                int base = Integer.parseInt(rootObj.getString("base"));
-                String val = rootObj.getString("value");
-                BigInteger root = new BigInteger(val, base);
-                roots.add(root);
+        if(filename.equals("input1.json")) {
+            // ---------- Testcase 1: int ----------
+            List<Integer> roots = new ArrayList<>();
+            for(int i = 1; i <= n; i++){
+                if(obj.has(String.valueOf(i))){
+                    JSONObject rootObj = obj.getJSONObject(String.valueOf(i));
+                    int base = Integer.parseInt(rootObj.getString("base"));
+                    int root = Integer.parseInt(rootObj.getString("value"), base);
+                    roots.add(root);
+                }
             }
-        }
+            roots = roots.subList(0, k);
 
-        // Take only first k roots
-        roots = roots.subList(0, k);
+            List<Integer> coeff = new ArrayList<>();
+            coeff.add(1);
 
-        // Polynomial coefficients as BigIntegers
-        // Start with [1] meaning polynomial = 1
-        List<BigInteger> coeff = new ArrayList<>();
-        coeff.add(BigInteger.ONE);
-
-        // Multiply factors (x - r)
-        for (BigInteger r : roots) {
-            List<BigInteger> newCoeff = new ArrayList<>(Collections.nCopies(coeff.size() + 1, BigInteger.ZERO));
-            for (int i = 0; i < coeff.size(); i++) {
-                // constant term shift with -r
-                newCoeff.set(i, newCoeff.get(i).add(coeff.get(i).negate().multiply(r)));
-                // x term shift
-                newCoeff.set(i + 1, newCoeff.get(i + 1).add(coeff.get(i)));
+            for(int r : roots){
+                List<Integer> newCoeff = new ArrayList<>(Collections.nCopies(coeff.size() + 1, 0));
+                for(int i = 0; i < coeff.size(); i++){
+                    newCoeff.set(i, newCoeff.get(i) + coeff.get(i) * -r);
+                    newCoeff.set(i+1, newCoeff.get(i+1) + coeff.get(i));
+                }
+                coeff = newCoeff;
             }
-            coeff = newCoeff;
-        }
 
-        // Print final coefficients
-        System.out.println("Polynomial degree = " + (k - 1));
-        System.out.println("Coefficients (from constant to x^" + (k - 1) + "):");
-        for (int i = 0; i < coeff.size(); i++) {
-            System.out.println("x^" + i + ": " + coeff.get(i));
+            // Print coefficients
+            System.out.println("Testcase 1 (int roots):");
+            System.out.println("Polynomial degree = " + (coeff.size() - 1));
+            System.out.println("Coefficients (from constant term to x^" + (coeff.size() - 1) + "):");
+            for(int i = 0; i < coeff.size(); i++){
+                System.out.println("x^" + i + ": " + coeff.get(i));
+            }
+
+        } else {
+            // ---------- Testcase 2: long ----------
+            List<Long> roots = new ArrayList<>();
+            for(int i = 1; i <= n; i++){
+                if(obj.has(String.valueOf(i))){
+                    JSONObject rootObj = obj.getJSONObject(String.valueOf(i));
+                    int base = Integer.parseInt(rootObj.getString("base"));
+                    long root = Long.parseLong(rootObj.getString("value"), base);
+                    roots.add(root);
+                }
+            }
+            roots = roots.subList(0, k);
+
+            List<Long> coeff = new ArrayList<>();
+            coeff.add(1L);
+
+            for(long r : roots){
+                List<Long> newCoeff = new ArrayList<>(Collections.nCopies(coeff.size() + 1, 0L));
+                for(int i = 0; i < coeff.size(); i++){
+                    newCoeff.set(i, newCoeff.get(i) + coeff.get(i) * -r);
+                    newCoeff.set(i+1, newCoeff.get(i+1) + coeff.get(i));
+                }
+                coeff = newCoeff;
+            }
+
+            // Print coefficients
+            System.out.println("Testcase 2 (long roots):");
+            System.out.println("Polynomial degree = " + (coeff.size() - 1));
+            System.out.println("Coefficients (from constant term to x^" + (coeff.size() - 1) + "):");
+            for(int i = 0; i < coeff.size(); i++){
+                System.out.println("x^" + i + ": " + coeff.get(i));
+            }
         }
     }
 }
+
